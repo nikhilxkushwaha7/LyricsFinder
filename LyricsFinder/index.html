@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lyrics Finder</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-color: #0d0e15;
+            --text-main: #f0f0f5;
+            --text-muted: #a0a0b0;
+            --accent-1: #ff2a5f;
+            --accent-2: #ff7a00;
+            --glass-bg: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --input-bg: rgba(0, 0, 0, 0.3);
+            --shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Background animated blobs */
+        .background-blobs {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+            overflow: hidden;
+            filter: blur(80px);
+        }
+
+        .blob {
+            position: absolute;
+            border-radius: 50%;
+            animation: float 20s infinite ease-in-out;
+        }
+
+        .blob-1 {
+            top: -10%;
+            left: -10%;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(255, 42, 95, 0.4), transparent 70%);
+        }
+
+        .blob-2 {
+            bottom: -10%;
+            right: -10%;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(255, 122, 0, 0.3), transparent 70%);
+            animation-delay: -5s;
+        }
+
+        .blob-3 {
+            top: 40%;
+            left: 40%;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(65, 88, 208, 0.3), transparent 70%);
+            animation-delay: -10s;
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translate(0, 0) scale(1);
+            }
+
+            33% {
+                transform: translate(30px, -50px) scale(1.1);
+            }
+
+            66% {
+                transform: translate(-20px, 20px) scale(0.9);
+            }
+        }
+
+        .container {
+            width: 100%;
+            max-width: 700px;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            z-index: 1;
+        }
+
+        header {
+            text-align: center;
+            margin-top: 2rem;
+        }
+
+        header h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #ffffff, #a0a0b0);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -1px;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .search-section {
+            display: flex;
+            flex-direction: column;
+            gap: 1.2rem;
+        }
+
+        .note {
+            background: rgba(255, 165, 0, 0.1);
+            color: #ffb84d;
+            padding: 0.8rem 1rem;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            border: 1px solid rgba(255, 165, 0, 0.2);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .glass-panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 2rem;
+            box-shadow: var(--shadow);
+        }
+
+        .search-card {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .input-group {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-group i {
+            position: absolute;
+            left: 1.2rem;
+            color: var(--text-muted);
+            font-size: 1.1rem;
+        }
+
+        .input-group input {
+            width: 100%;
+            background: var(--input-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 1.2rem 1.2rem 1.2rem 3.5rem;
+            color: var(--text-main);
+            font-size: 1.05rem;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .input-group input::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .input-group input:focus {
+            border-color: rgba(255, 255, 255, 0.3);
+            background: rgba(0, 0, 0, 0.5);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.05);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            margin-top: 0.5rem;
+        }
+
+        button {
+            cursor: pointer;
+            border: none;
+            outline: none;
+            font-size: 1.05rem;
+            font-weight: 600;
+            border-radius: 16px;
+            padding: 1.2rem;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.6rem;
+        }
+
+        .primary-btn {
+            flex: 2;
+            background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+            color: #fff;
+            box-shadow: 0 4px 20px rgba(255, 42, 95, 0.3);
+        }
+
+        .primary-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(255, 42, 95, 0.4);
+        }
+
+        .primary-btn:active {
+            transform: translateY(0);
+        }
+
+        .secondary-btn {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--text-main);
+        }
+
+        .secondary-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .result-section {
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 2rem;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 1.5rem;
+            padding: 4rem;
+            color: var(--text-main);
+            font-weight: 500;
+        }
+
+        .spinner {
+            width: 45px;
+            height: 45px;
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top-color: var(--accent-1);
+            border-radius: 50%;
+            animation: spin 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .error-message {
+            background: rgba(255, 50, 50, 0.1);
+            color: #ff8080;
+            padding: 2rem;
+            border-radius: 20px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+            border: 1px solid rgba(255, 50, 50, 0.2);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .error-message i {
+            font-size: 2.5rem;
+            color: #ff4d4d;
+        }
+
+        .lyrics-card {
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            max-height: 65vh;
+        }
+
+        .lyrics-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--glass-border);
+            margin-bottom: 1.5rem;
+        }
+
+        .song-info h2 {
+            font-size: 1.8rem;
+            margin-bottom: 0.3rem;
+            font-weight: 700;
+        }
+
+        .song-info h3 {
+            font-size: 1.15rem;
+            color: var(--accent-2);
+            font-weight: 500;
+        }
+
+        .icon-btn {
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--text-main);
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            flex-shrink: 0;
+        }
+
+        .icon-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: scale(1.05) rotate(5deg);
+        }
+
+        /* Tabs */
+        .lyrics-tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid var(--glass-border);
+            padding-bottom: 0.5rem;
+        }
+
+        .tab-btn {
+            background: transparent;
+            color: var(--text-muted);
+            border: none;
+            font-size: 1.1rem;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            position: relative;
+            border-radius: 0;
+            font-weight: 500;
+            display: inline-block;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .tab-btn:hover {
+            color: var(--text-main);
+            transform: none;
+            box-shadow: none;
+            background: transparent;
+        }
+
+        .tab-btn.active {
+            color: var(--accent-1);
+        }
+
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: -0.6rem;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: var(--accent-1);
+            border-radius: 3px;
+        }
+
+        .tab-btn:disabled {
+            color: rgba(255, 255, 255, 0.2);
+            cursor: not-allowed;
+        }
+
+        .lyrics-content {
+            overflow-y: auto;
+            padding-right: 15px;
+            font-size: 1.15rem;
+            line-height: 1.9;
+            white-space: pre-wrap;
+            color: #e2e2e2;
+            text-align: center;
+            font-weight: 400;
+        }
+
+        /* Custom Scrollbar */
+        .lyrics-content::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .lyrics-content::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+        }
+
+        .lyrics-content::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+        }
+
+        .lyrics-content::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .toast {
+            position: absolute;
+            top: 2rem;
+            left: 50%;
+            transform: translateX(-50%) translateY(-20px);
+            background: linear-gradient(135deg, #4caf50, #2e7d32);
+            color: white;
+            padding: 0.8rem 1.5rem;
+            border-radius: 30px;
+            font-size: 1rem;
+            font-weight: 500;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            z-index: 10;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 1.2rem;
+            }
+
+            header h1 {
+                font-size: 2.5rem;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            .lyrics-card {
+                padding: 1.5rem;
+            }
+
+            .lyrics-content {
+                font-size: 1.05rem;
+                text-align: left;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="background-blobs">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+    </div>
+    <div class="container">
+        <header>
+            <h1>LYRICS FINDER</h1>
+        </header>
+
+        <section class="search-section">
+            <p class="note"><i class="fas fa-info-circle"></i>FOR MORE ACCURATE RESULTS, PLEASE ENTER THE ARTIST
+                NAME ALONG WITH THE SONG TITLE</p>
+            <div class="search-card glass-panel">
+                <div class="input-group">
+                    <i class="fas fa-music"></i>
+                    <input type="text" id="song-input" placeholder="Song Name" required autofocus>
+                </div>
+                <div class="input-group">
+                    <i class="fas fa-user-astronaut"></i>
+                    <input type="text" id="artist-input" placeholder="Artist Name">
+                </div>
+                <div class="button-group">
+                    <button id="search-btn" class="primary-btn"><i class="fas fa-search"></i> Search</button>
+                    <button id="clear-btn" class="secondary-btn"><i class="fas fa-eraser"></i> Clear</button>
+                </div>
+            </div>
+        </section>
+
+        <section id="result-section" class="result-section hidden">
+            <div id="loading" class="loading hidden">
+                <div class="spinner"></div>
+                <p>Searching lyrics...</p>
+            </div>
+
+            <div id="error-message" class="error-message hidden">
+                <i class="fas fa-exclamation-triangle"></i>
+                <p>Lyrics not found. Try adding the artist name.</p>
+            </div>
+
+            <div id="lyrics-card" class="lyrics-card glass-panel hidden">
+                <div class="lyrics-header">
+                    <div class="song-info">
+                        <h2 id="display-title">Song Title</h2>
+                        <h3 id="display-artist">Artist Name</h3>
+                    </div>
+                    <button id="copy-btn" class="icon-btn" title="Copy Lyrics"><i class="fas fa-copy"></i></button>
+                </div>
+                <div class="lyrics-tabs" id="lyrics-tabs">
+                    <button id="tab-synced" class="tab-btn active">Synced Lyrics</button>
+                    <button id="tab-plain" class="tab-btn">Plain Lyrics</button>
+                </div>
+
+                <div class="lyrics-content" id="lyrics-container-synced">
+                    <!-- Synced Lyrics go here -->
+                </div>
+                <div class="lyrics-content hidden" id="lyrics-container-plain">
+                    <!-- Plain Lyrics go here -->
+                </div>
+                <div id="copy-toast" class="toast hidden">Lyrics copied to clipboard!</div>
+            </div>
+        </section>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const songInput = document.getElementById('song-input');
+            const artistInput = document.getElementById('artist-input');
+            const searchBtn = document.getElementById('search-btn');
+            const clearBtn = document.getElementById('clear-btn');
+
+            const resultSection = document.getElementById('result-section');
+            const loadingDiv = document.getElementById('loading');
+            const errorMessage = document.getElementById('error-message');
+            const lyricsCard = document.getElementById('lyrics-card');
+
+            const displayTitle = document.getElementById('display-title');
+            const displayArtist = document.getElementById('display-artist');
+
+            const tabSynced = document.getElementById('tab-synced');
+            const tabPlain = document.getElementById('tab-plain');
+            const containerSynced = document.getElementById('lyrics-container-synced');
+            const containerPlain = document.getElementById('lyrics-container-plain');
+
+            const copyBtn = document.getElementById('copy-btn');
+            const copyToast = document.getElementById('copy-toast');
+
+            // Handle Tabs
+            tabSynced.addEventListener('click', () => {
+                if (tabSynced.disabled) return;
+                tabSynced.classList.add('active');
+                tabPlain.classList.remove('active');
+                containerSynced.classList.remove('hidden');
+                containerPlain.classList.add('hidden');
+            });
+
+            tabPlain.addEventListener('click', () => {
+                if (tabPlain.disabled) return;
+                tabPlain.classList.add('active');
+                tabSynced.classList.remove('active');
+                containerPlain.classList.remove('hidden');
+                containerSynced.classList.add('hidden');
+            });
+
+            // Handle Search
+            searchBtn.addEventListener('click', performSearch);
+
+            // Allow 'Enter' to trigger search
+            songInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') performSearch();
+            });
+            artistInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') performSearch();
+            });
+
+            // Handle Clear
+            clearBtn.addEventListener('click', () => {
+                songInput.value = '';
+                artistInput.value = '';
+                hideAllResults();
+                songInput.focus();
+            });
+
+            // Handle Copy
+            copyBtn.addEventListener('click', () => {
+                let activeContainer = containerSynced;
+                if (tabPlain.classList.contains('active')) {
+                    activeContainer = containerPlain;
+                }
+
+                const textToCopy = `${displayTitle.textContent} - ${displayArtist.textContent}\n\n${activeContainer.textContent}`;
+                navigator.clipboard.writeText(textToCopy).then(() => {
+                    copyToast.classList.remove('hidden');
+                    // Allow display:none to be removed before adding opacity transition
+                    setTimeout(() => {
+                        copyToast.classList.add('show');
+                    }, 10);
+
+                    setTimeout(() => {
+                        copyToast.classList.remove('show');
+                        setTimeout(() => copyToast.classList.add('hidden'), 300);
+                    }, 2500);
+                }).catch(err => {
+                    console.error('Failed to copy text: ', err);
+                    alert('Failed to copy lyrics to clipboard.');
+                });
+            });
+
+            async function performSearch() {
+                const song = songInput.value.trim();
+                const artist = artistInput.value.trim();
+
+                if (!song && !artist) {
+                    songInput.focus();
+                    return;
+                }
+
+                // Setup UI for searching - Clear previous results
+                hideAllResults();
+                resultSection.classList.remove('hidden');
+                loadingDiv.classList.remove('hidden');
+
+                try {
+                    let data = null;
+
+                    if (song && artist) {
+                        // Try exact match first if both are provided
+                        const exactUrl = `https://lrclib.net/api/get?artist=${encodeURIComponent(artist)}&track=${encodeURIComponent(song)}`;
+                        const response = await fetch(exactUrl);
+
+                        if (response.ok) {
+                            data = await response.json();
+                        } else {
+                            // Fallback to search if exact match fails
+                            data = await searchLyrics(song, artist);
+                        }
+                    } else {
+                        // If only one is provided, use search directly
+                        data = await searchLyrics(song, artist);
+                    }
+
+                    if (data) {
+                        displayLyrics(data);
+                    } else {
+                        showError();
+                    }
+
+                } catch (error) {
+                    console.error('Error fetching lyrics:', error);
+                    showError();
+                }
+            }
+
+            async function searchLyrics(song, artist) {
+                const queryParts = [];
+                if (song) queryParts.push(song);
+                if (artist) queryParts.push(artist);
+
+                const searchUrl = `https://lrclib.net/api/search?q=${encodeURIComponent(queryParts.join(' '))}`;
+                const response = await fetch(searchUrl);
+
+                if (!response.ok) {
+                    throw new Error(`Search API Error: ${response.status}`);
+                }
+
+                const results = await response.json();
+
+                if (results && results.length > 0) {
+                    // Find the best match that has lyrics
+                    const match = results.find(track => track.syncedLyrics || track.plainLyrics);
+                    return match || null;
+                }
+                return null;
+            }
+
+            function displayLyrics(data) {
+                const { trackName, artistName, syncedLyrics, plainLyrics } = data;
+
+                displayTitle.textContent = trackName || songInput.value;
+                displayArtist.textContent = artistName || artistInput.value || 'Unknown Artist';
+
+                if (!syncedLyrics && !plainLyrics) {
+                    showError();
+                    return;
+                }
+
+                if (syncedLyrics) {
+                    containerSynced.textContent = syncedLyrics;
+                    tabSynced.disabled = false;
+                } else {
+                    containerSynced.textContent = "Synced lyrics are not available for this track.";
+                    tabSynced.disabled = true;
+                }
+
+                if (plainLyrics) {
+                    containerPlain.textContent = plainLyrics;
+                    tabPlain.disabled = false;
+                } else {
+                    containerPlain.textContent = "Plain lyrics are not available for this track.";
+                    tabPlain.disabled = true;
+                }
+
+                // Set default active tab
+                if (syncedLyrics) {
+                    tabSynced.click();
+                } else {
+                    tabPlain.click();
+                }
+
+                loadingDiv.classList.add('hidden');
+                lyricsCard.classList.remove('hidden');
+            }
+
+            function showError() {
+                loadingDiv.classList.add('hidden');
+                errorMessage.classList.remove('hidden');
+            }
+
+            function hideAllResults() {
+                resultSection.classList.add('hidden');
+                loadingDiv.classList.add('hidden');
+                errorMessage.classList.add('hidden');
+                lyricsCard.classList.add('hidden');
+                containerSynced.classList.add('hidden');
+                containerPlain.classList.add('hidden');
+            }
+        });
+    </script>
+</body>
+
+</html>
