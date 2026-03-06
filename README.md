@@ -2,7 +2,7 @@
 
 <div align="center">
 
-  <img src="assets/hero.svg" alt="Lyrics Finder Hero Banner" width="100%" />
+  <img src="hero.svg" alt="Lyrics Finder Hero Banner" width="100%" />
 
   <br />
   <br />
