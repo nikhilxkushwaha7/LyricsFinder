@@ -1,3 +1,5 @@
+<div style="font-family: 'Outfit', 'Segoe UI', system-ui, sans-serif;">
+
 <div align="center">
 
   <img src="assets/hero.svg" alt="Lyrics Finder Hero Banner" width="100%" />
@@ -90,3 +92,5 @@ Found a bug or have an idea for a stunning new animation? Contributions, issues,
 <p align="center">
   Crafted with ❤️ and 🎵 using pure Vanilla JavaScript
 </p>
+
+</div>
